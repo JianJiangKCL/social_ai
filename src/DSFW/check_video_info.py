@@ -107,6 +107,6 @@ def analyze_video_data(json_path):
         print("\nNo valid video durations found to analyze.")
 
 if __name__ == "__main__":
-    json_file_path = "/data/jj/proj/AFF/data/train_set_1.json"
+    json_file_path = "/data/jj/proj/AFF/data/DSFW/test_set_1.json"
     analyze_video_data(json_file_path)
     print("\nScript finished.") 

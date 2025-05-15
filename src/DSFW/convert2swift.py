@@ -51,7 +51,7 @@ def convert_to_jsonl(input_json_path, output_jsonl_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Convert a JSON file to JSONL format.")
-    parser.add_argument("--input_file", default="/data/jj/proj/AFF/data/DSFW/train_set_1.json", help="Path to the input JSON file.")
+    parser.add_argument("--input_file", default="/data/jj/proj/AFF/data/DSFW/test_set_1.json", help="Path to the input JSON file.")
     args = parser.parse_args()
 
     input_file = args.input_file

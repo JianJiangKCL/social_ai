@@ -2,6 +2,38 @@ import csv
 import json
 import os
 import argparse
+import glob
+
+def build_video_path_mapping(base_dir):
+    """
+    Scan all part folders in the base directory and create a mapping 
+    from video ID to its subfolder path.
+    
+    Args:
+        base_dir: The base directory containing part_* folders
+        
+    Returns:
+        A dictionary mapping video IDs (as integers) to their complete paths
+    """
+    video_mapping = {}
+    
+    # Get all part_* directories
+    part_dirs = glob.glob(os.path.join(base_dir, "part_*"))
+    
+    for part_dir in part_dirs:
+        # Get all video files in this part directory
+        video_files = glob.glob(os.path.join(part_dir, "*.mp4"))
+        
+        for video_path in video_files:
+            # Extract the video ID (filename without extension)
+            video_filename = os.path.basename(video_path)
+            video_id = int(os.path.splitext(video_filename)[0])
+            
+            # Store the full path for this video ID
+            video_mapping[video_id] = video_path
+    
+    print(f"Found {len(video_mapping)} videos across {len(part_dirs)} part directories")
+    return video_mapping
 
 def convert_csv_to_json(csv_file_path, json_file_path, video_base_path):
     emotion_mapping = {
@@ -15,6 +47,12 @@ def convert_csv_to_json(csv_file_path, json_file_path, video_base_path):
     }
 
     try:
+        # Build the video path mapping if using the /original directory
+        video_path_mapping = {}
+        if "original" in video_base_path:
+            print(f"Building video path mapping from {video_base_path}...")
+            video_path_mapping = build_video_path_mapping(video_base_path)
+        
         all_records = []
         with open(csv_file_path, 'r', newline='') as csvfile:
             reader = csv.DictReader(csvfile)
@@ -37,8 +75,16 @@ def convert_csv_to_json(csv_file_path, json_file_path, video_base_path):
                     print(f"Warning: Unknown label '{label_num}' for video_name '{video_name}'. Skipping.")
                     continue
 
-                video_file_name = f"{int(video_name):05d}.avi" # Assuming .avi extension
-                full_video_path = os.path.join(video_base_path, video_file_name)
+                # Determine the full video path
+                video_id = int(video_name)
+                
+                if video_path_mapping and video_id in video_path_mapping:
+                    # Use the pre-mapped path directly
+                    full_video_path = video_path_mapping[video_id]
+                else:
+                    # Fallback to the old method
+                    video_file_name = f"{video_id:05d}.avi"  # Assuming .avi extension
+                    full_video_path = os.path.join(video_base_path, video_file_name)
 
                 json_record = {
                     "video_name": video_name,
@@ -90,13 +136,13 @@ if __name__ == "__main__":
     effective_default_json_path = os.path.join(default_output_json_parent_dir, json_filename_default)
 
     # --- Define default for video base path ---
-    default_video_base_path = "/data/datasets/affective/DFEW/Clip/clip_224x224_avi/"
+    default_video_base_path = "/data/datasets/affective/DFEW/Clip/original/"
 
     parser = argparse.ArgumentParser(description="Convert a CSV file to JSON format, adding video paths.")
     parser.add_argument(
         "--csv_file_path",
         type=str,
-        default="/data/jj/proj/AFF/data/DSFW/train_set_1.csv",
+        default="/data/jj/proj/AFF/data/DSFW/test_set_1.csv",
         help=f"Path to the input CSV file. Default is intelligently chosen, currently: '{effective_default_csv_path}'."
     )
     parser.add_argument(

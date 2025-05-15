@@ -7,6 +7,11 @@ swift infer \
 
 
 # bs one 1 maximum
+# VIDEO_MAX_PIXELS=50176 \
+VIDEO_MAX_PIXELS=150528 \
+
+VIDEO_MAX_PIXELS=50176 \
+FPS_MAX_FRAMES=24 \
 CUDA_VISIBLE_DEVICES=1 \
 swift sft \
     --model /data/ckpt/Qwen/Qwen2.5-Omni-3B \
@@ -14,8 +19,8 @@ swift sft \
     --dataset /data/jj/proj/AFF/data/DSFW/train_set_1.jsonl \
     --val_dataset /data/jj/proj/AFF/data/DSFW/test_set_1.jsonl \
     --torch_dtype bfloat16 \
-    --per_device_train_batch_size 1 \
-    --per_device_eval_batch_size 1 \
+    --per_device_train_batch_size 2 \
+    --per_device_eval_batch_size 2 \
     --output_dir output/ \
     --logging_dir output/ \
     --freeze_vit true \
@@ -23,7 +28,7 @@ swift sft \
     --lora_alpha 16 \
     --target_modules all-linear \
     --gradient_checkpointing false \
-    --gradient_accumulation_steps 4 \
+    --gradient_accumulation_steps 2 \
     --save_strategy "steps" \
     --save_steps 100 \
     --save_total_limit 10 \
